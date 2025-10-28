@@ -1,0 +1,81 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}Bill #{{ bill.id }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header" style="display: flex;justify-content: space-between;align-items: center;">
+                    <h2>Bill #{{ bill.id }}</h2>
+                    <div class="bill-actions">
+                        <a href="{% url 'bill_update' bill.pk %}" class="button button-secondary">Edit Bill</a>
+                        <a href="{% url 'generate_bill_pdf' bill.pk %}" class="button button-primary">Download PDF</a>
+                        <a href="{% url 'bill_delete' bill.pk %}" class="button button-danger">Delete Bill</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="bill-header-info">
+                        
+                        <div class="section-right" style="text-align: right;">
+                            <p><strong>Bill Date:</strong> {{ bill.bill_date|date:"F d, Y" }}</p>
+                            <p><strong>Due Date:</strong> {{ bill.due_date|date:"F d, Y"|default:"N/A" }}</p>
+                            <p><strong>Status:</strong>
+                                {% if bill.is_paid %}
+                                    <span style="color: var(--success-color); font-weight: 600;">Paid</span>
+                                {% else %}
+                                    <span style="color: var(--danger-color); font-weight: 600;">Unpaid</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="section-left">
+                            <h3>Bill To:</h3>
+                            <p><strong>{{ bill.client.name }}</strong></p>
+                            <p>{{ bill.client.address|linebreaksbr }}</p>
+                            <p>Email: {{ bill.client.email|default:"N/A" }}</p>
+                            <p>Phone: {{ bill.client.phone|default:"N/A" }}</p>
+                        </div>
+                    </div>
+
+                    <h3 class="mt-4">Items</h3>
+                    <div class="table-responsive">
+                        <table class="data-table bill-items-table">
+                            <thead>
+                                <tr>
+                                    <th>Product/Service</th>
+                                    <th>Quantity</th>
+                                    <th>Unit Price (Base)</th> {# This is calculated as product.price #}
+                                    <th>Tax %</th>
+                                    <th>Tax Amount</th>
+                                    <th>Amount (Inc. Tax)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in bill.items.all %}
+                                    <tr>
+                                        <td>{{ item.product_service.name }}</td>
+                                        <td>{{ item.quantity }}</td>
+                                        <td>₹{{ item.product_service.price|floatformat:2 }}</td> {# Use product_service.price for base unit price #}
+                                        <td>{{ item.product_service.tax_percentage|floatformat:2 }}%</td>
+                                        <td>₹{{ item.tax_amount_per_item|floatformat:2 }}</td> {# Use your existing property #}
+                                        <td>₹{{ item.item_total|floatformat:2 }}</td> {# Use your existing item_total #}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bill-summary">
+                        <div class="bill-summary-card" style="text-align: right;">
+                            <p><span>Subtotal (Base):</span> <span>₹{{ bill.subtotal_before_all_taxes|floatformat:2 }}</span></p>
+                            <p><span>Tax:</span> <span>₹{{ bill.total_tax_on_items|floatformat:2 }}</span></p>
+                            <p><span><strong>TOTAL AMOUNT (INC. ALL TAXES):</strong></span> <span><strong>₹{{ bill.total_amount|floatformat:2 }}</strong></span></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}Bills{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Bills</h2>
+                    <a href="{% url 'bill_create' %}" class="button button-primary">Create New Bill</a>
+                </div>
+                <div class="card-body">
+                    {% if bills %}
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Bill #</th>
+                                    <th>Client</th>
+                                    <th>Bill Date</th>
+                                    <th>Due Date</th>
+                                    <th>Total Amount</th>
+                                    <th>Paid?</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bill in bills %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td><a href="{% url 'bill_detail' bill.pk %}">{{ bill.id }}</a></td>
+                                        <td>{{ bill.client.name }}</td>
+                                        <td>{{ bill.bill_date|date:"M d, Y" }}</td>
+                                        <td>{{ bill.due_date|date:"M d, Y"|default:"-" }}</td>
+                                        <td>₹{{ bill.total_amount|floatformat:2 }}</td>
+                                        <td>
+                                            {% if bill.is_paid %}
+                                                <span style="color: var(--success-color);">Yes</span>
+                                            {% else %}
+                                                <span style="color: var(--danger-color);">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="actions">
+                                            <a href="{% url 'bill_detail' bill.pk %}">View</a>
+                                            <a href="{% url 'bill_update' bill.pk %}">Edit</a>
+                                            <a href="{% url 'generate_bill_pdf' bill.pk %}">PDF</a>
+                                            <a href="{% url 'bill_delete' bill.pk %}">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No bills found. <a href="{% url 'bill_create' %}">Create your first bill</a>.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

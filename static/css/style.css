@@ -1,0 +1,603 @@
+/* static/css/style.css */
+
+/* --- General Body & Typography --- */
+:root {
+    --bg-dark: #1a1a2e;
+    --bg-medium: #1f283e;
+    --bg-light: #2c394b;
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --accent-blue: #0f4c75;
+    --accent-light-blue: #3282b8;
+    --border-color: #4a5d73;
+    --shadow-color: rgba(0, 0, 0, 0.3);
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+a {
+    color: var(--accent-light-blue);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--accent-blue);
+    text-decoration: underline;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.card {
+    background-color: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    margin-bottom: 1.5rem;
+    overflow: hidden; /* For rounded corners on tables inside cards */
+}
+
+.card-header {
+    background-color: var(--bg-light);
+    padding: 1rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -0.75rem; /* Compensate for column padding */
+}
+
+.col-12, .col-md-6, .col-md-4, .col-md-3 {
+    
+    padding: 0 0.75rem;
+    box-sizing: border-box; /* Include padding in element's total width */
+}
+
+.col-12 { flex: 0 0 100%; max-width: 100%; }
+.col-md-6 { flex: 0 0 50%; max-width: 50%; }
+.col-md-4 { flex: 0 0 33.333%; max-width: 33.333%; }
+.col-md-3 { flex: 0 0 25%; max-width: 25%; }
+
+@media (max-width: 768px) {
+    .col-md-6, .col-md-4, .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+
+/* --- Navigation Bar --- */
+.navbar {
+    background-color: var(--bg-medium);
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px var(--shadow-color);
+}
+
+.navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-light-blue);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand:hover {
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.navbar-logo {
+    height: 30px; /* Adjust as needed */
+    margin-right: 0.5rem;
+}
+
+.nav-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 1.5rem;
+}
+
+.nav-item a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 1rem;
+    padding: 0.5rem 0;
+    transition: color 0.3s ease;
+}
+
+.nav-item a:hover {
+    color: var(--accent-light-blue);
+    text-decoration: none;
+}
+
+.auth-links {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-links span {
+    color: var(--text-secondary);
+}
+
+/* --- Forms --- */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 1rem;
+    box-sizing: border-box; /* Ensures padding doesn't increase width */
+}
+
+input[type="checkbox"] {
+    margin-right: 0.5rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: var(--accent-light-blue);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(50, 130, 184, 0.3); /* Accent glow */
+}
+
+textarea {
+    resize: vertical;
+}
+
+.button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+.button-primary {
+    background-color: var(--accent-light-blue);
+    color: var(--text-primary);
+}
+
+.button-primary:hover {
+    background-color: var(--accent-blue);
+    color: var(--text-primary);
+}
+
+.button-secondary {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.button-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.button-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.button-danger:hover {
+    background-color: #c82333; /* Darker red */
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.errorlist {
+    color: var(--danger-color);
+    list-style: none;
+    padding: 0;
+    margin-top: 0.5rem;
+    font-size: 0.9em;
+}
+
+/* --- Table Styles --- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    background-color: var(--bg-medium);
+    border-radius: 8px; /* Apply to parent card, this is for inner cells */
+    overflow: hidden;
+}
+
+.data-table th,
+.data-table td {
+    padding: 0.8rem 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background-color: #2a3a4c; /* Slightly lighter bg on hover */
+}
+
+.data-table .actions a {
+    margin-right: 0.75rem;
+    color: var(--accent-light-blue);
+}
+
+.data-table .actions a:hover {
+    color: var(--accent-blue);
+}
+
+/* --- Alerts and Messages --- */
+.alert {
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.2);
+    color: var(--success-color);
+    border: 1px solid var(--success-color);
+}
+
+.alert-error, .alert-danger {
+    background-color: rgba(220, 53, 69, 0.2);
+    color: var(--danger-color);
+    border: 1px solid var(--danger-color);
+}
+
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.2);
+    color: var(--info-color);
+    border: 1px solid var(--info-color);
+}
+
+/* --- Dashboard Specific --- */
+.stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    background-color: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.2rem;
+    box-shadow: 0 4px 8px var(--shadow-color);
+}
+
+.stat-card .label {
+    font-size: 0.9em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.stat-card .value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-card.primary { background-color: #0f4c75; border-color: #0c3e60; }
+.stat-card.primary .value { color: white; }
+.stat-card.primary .label { color: rgba(255,255,255,0.7); }
+
+.stat-card.success { background-color: #28a745; border-color: #218838; }
+.stat-card.success .value { color: white; }
+.stat-card.success .label { color: rgba(255,255,255,0.7); }
+
+.stat-card.info { background-color: #17a2b8; border-color: #138496; }
+.stat-card.info .value { color: white; }
+.stat-card.info .label { color: rgba(255,255,255,0.7); }
+
+.stat-card.warning { background-color: #ffc107; border-color: #e0a800; }
+.stat-card.warning .value { color: #333; }
+.stat-card.warning .label { color: rgba(0,0,0,0.7); }
+
+
+/* --- Bill Form Specific --- */
+.bill-items-section {
+    margin-top: 2rem;
+    /* border-top: 1px solid var(--border-color); Remove this if the table handles spacing well */
+    padding-top: 1.5rem;
+}
+
+/* TABLE version for Bill Items */
+.bill-items-table {
+    width: 100%;
+    border-collapse: separate; /* Use separate to allow border-radius on rows */
+    border-spacing: 0 0.75rem; /* Space between rows for a card-like effect */
+    margin-bottom: 0;
+}
+
+.bill-items-table thead th {
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border-color);
+    text-transform: uppercase;
+    font-size: 0.9em;
+    white-space: nowrap;
+    position: sticky; /* Keep header visible on scroll */
+    top: 0;
+    z-index: 10;
+}
+
+.bill-items-table th:first-child { border-top-left-radius: 6px; }
+.bill-items-table th:last-child { border-top-right-radius: 6px; }
+
+/* Specific column widths for better control */
+.bill-items-table th.col-product-service,
+.bill-items-table td.col-product-service { width: 30%; } /* Slightly reduced width */
+.bill-items-table th.col-qty,
+.bill-items-table td.col-qty { width: 8%; text-align: center;}
+.bill-items-table th.col-unit-price,
+.bill-items-table td.col-unit-price { width: 14%; text-align: right; } /* Adjusted for better spacing */
+.bill-items-table th.col-tax-percent,
+.bill-items-table td.col-tax-percent { width: 10%; text-align: center; }
+.bill-items-table th.col-tax-amount,
+.bill-items-table td.col-tax-amount { width: 14%; text-align: right; } /* Adjusted for better spacing */
+.bill-items-table th.col-amount,
+.bill-items-table td.col-amount { width: 18%; text-align: right; } /* More space for total amount */
+.bill-items-table th.col-actions,
+.bill-items-table td.col-actions { width: 6%; text-align: center; }
+
+
+.bill-items-table tbody tr {
+    background-color: var(--bg-medium);
+    border: 1px solid var(--border-color);
+    border-radius: 8px; /* Rounded corners for each row */
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    transition: all 0.2s ease-in-out;
+}
+
+.bill-items-table tbody tr:hover {
+    background-color: #2a3a4c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.bill-items-table tbody td {
+    padding: 0.75rem 1rem; /* Consistent padding for cells */
+    vertical-align: middle;
+    border: none; /* No inner cell borders */
+}
+
+/* Form control styling within table cells */
+.bill-items-table input[type="text"],
+.bill-items-table input[type="number"],
+.form-control-static {
+    width: 100%;
+    padding: 0.5rem 0.75rem; /* Slightly larger padding for readability */
+    height: auto; /* Let content define height, min-height if needed */
+    min-height: calc(1.5em + 1rem + 2px); /* Maintain a consistent height */
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Align text left by default */
+}
+
+/* Specific alignments for static text */
+.bill-items-table td.col-qty .form-control-static,
+.bill-items-table td.col-tax-percent .form-control-static {
+    justify-content: center; /* Center quantity and tax % */
+}
+
+.bill-items-table td.col-unit-price .form-control-static,
+.bill-items-table td.col-tax-amount .form-control-static,
+.bill-items-table td.col-amount .form-control-static {
+    justify-content: flex-end; /* Right align currency values */
+}
+
+
+.bill-items-table .item-quantity {
+    max-width: 80px; /* Slightly wider for quantity */
+    text-align: center;
+}
+
+.bill-items-table .remove-item-button {
+    background-color: var(--danger-color);
+    color: white;
+    padding: 0.5rem 0.75rem; /* Larger button for easier clicking */
+    border-radius: 4px;
+    font-size: 1rem;
+    height: auto; /* Let content define height */
+    min-height: calc(1.5em + 1rem + 2px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bill-items-table .remove-item-button:hover {
+    background-color: #c82333;
+}
+
+/* Total Bill Amount Section */
+.total-bill-section {
+    background-color: var(--bg-light);
+    border-top: 1px solid var(--border-color);
+    padding: 1.5rem !important; /* Important to override card p-3 */
+    text-align: right;
+    border-radius: 0 0 8px 8px; /* Match card border radius */
+    box-shadow: inset 0 3px 5px rgba(0,0,0,0.1);
+}
+
+.total-bill-section h4 {
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    margin-bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* Space between label and amount */
+    align-items: baseline;
+}
+
+#total-bill-amount {
+    color: var(--accent-light-blue);
+    font-weight: 700;
+    min-width: 120px; /* Ensure space for amount */
+    text-align: right;
+}
+
+.bill-items-section input[type="checkbox"] {
+    display: none !important;
+}
+
+#add-item-button {
+    margin-bottom: 1.5rem;
+    align-self: flex-end;
+}
+
+.logout-btn {
+    background-color: #ff4b5c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+
+/* In your CSS file (e.g., style.css) */
+
+/* Styles for the autocomplete dropdown menu */
+.ui-autocomplete {
+    background-color: var(--secondary-background-color); /* Use a darker background from your theme */
+    border: 1px solid var(--border-color); /* Add a subtle border */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add some shadow */
+    list-style: none;
+    padding: 0; /* Important: remove padding here to ensure items fill the width */
+    margin: 0;
+    z-index: 1000; /* Ensure it appears above other elements */
+    color: var(--text-color); /* Set default text color for all items */
+    border-radius: var(--border-radius, 5px); /* Apply border-radius to the whole dropdown */
+    overflow: hidden; /* Ensures child elements don't overflow rounded corners */
+}
+
+/* Styles for individual items in the dropdown */
+.ui-menu-item {
+    /* Removed padding from here. Padding will now be part of the active state. */
+    cursor: pointer;
+    font-size: 0.95em;
+    color: var(--text-color); /* Ensure text color is visible */
+    /* No background-color here for normal state */
+}
+
+/* Styles for the highlighted (hovered/selected) item in the dropdown */
+.ui-menu-item.ui-state-active,
+.ui-menu-item:hover {
+    background-color: var(--primary-color); /* Use your theme's primary/highlight color */
+    color: var(--light-text-color, #ffffff); /* Ensure text on highlight is white or light */
+    /* Apply padding only when active/hovered */
+    /* Removed border-radius from here, as it's now on .ui-autocomplete */
+}
+
+/* Styles for non-highlighted items to have padding */
+/* This ensures all items have padding, but the active state handles its own background */
+
+
+/* Optional: Add some padding/margin if items are too close */
+.ui-autocomplete .ui-menu-item:not(:last-child) {
+    border-bottom: 1px solid grey; /* Light separator between items */
+}
+
+
+
+
+

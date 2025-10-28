@@ -1,0 +1,210 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Define your CSS variables for colors if not already in base.html */
+        :root {
+            --bg-dark: #1a1e27; /* Dark background */
+            --bg-light: #2c313a; /* Lighter background for cards/tooltips */
+            --text-primary: #e0e6ed; /* Light text for readability */
+            --text-secondary: #9aa9b8; /* Secondary text, e.g., axis labels */
+            --border-color: #444c5a; /* Border color for grids, tooltips */
+            --accent-light-blue: #3282b8; /* Main accent color for the line */
+            --accent-light-blue-transparent: rgba(50, 130, 184, 0.4); /* Transparent version */
+            --primary-card: #205e8b;
+            --success-card: #3f905c;
+            --info-card: #2d739a;
+            --warning-card: #d4a73e;
+            /* New color for a more vibrant chart line */
+            --chart-line-color: #4dc9ff; /* A brighter blue */
+            --chart-fill-color: rgba(0, 179, 255, 1); /* Semi-transparent fill for the brighter line */
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        .card {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-header {
+            background-color: var(--bg-light);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            min-height: 120px;
+            color: white; /* Ensure text is visible on colored cards */
+        }
+
+        .stat-card.primary { background-color: var(--primary-card); }
+        .stat-card.success { background-color: var(--success-card); }
+        .stat-card.info { background-color: var(--info-card); }
+        .stat-card.warning { background-color: var(--warning-card); }
+
+        .stat-card .label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <h1>Dashboard</h1>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card stat-card primary">
+                <span class="label">Total Clients</span>
+                <span class="value">{{ total_clients }}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card success">
+                <span class="label">Total Products</span>
+                <span class="value">{{ total_products }}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card info">
+                <span class="label">Total Bills</span>
+                <span class="value">{{ total_bills }}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card warning">
+                <span class="label">Unpaid Bills</span>
+                <span class="value">{{ unpaid_bills_count }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">Monthly Income (Paid Bills)</div>
+                <div class="card-body">
+                    <canvas id="monthlyIncomeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Parse the JSON data passed from Django view
+    const chartData = JSON.parse('{{ chart_data_json|escapejs }}');
+
+    const ctx = document.getElementById('monthlyIncomeChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.labels,
+            datasets: [{
+                label: 'Monthly Income',
+                data: chartData.data,
+                // Using new, brighter colors
+                backgroundColor: 'var(--chart-fill-color)',
+                borderColor: 'var(--chart-line-color)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                // White points with a border matching the line color
+                pointBackgroundColor: 'white',
+                pointBorderColor: 'var(--chart-line-color)',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8,
+                pointHoverBackgroundColor: 'var(--chart-line-color)', // Hover state uses line color
+                pointHoverBorderColor: 'white'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            height: 400,
+
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'var(--border-color)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: 'var(--text-secondary)',
+                        padding: 10,
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'var(--border-color)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        color: 'var(--text-secondary)',
+                        padding: 10
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false,
+                },
+                tooltip: {
+                    // Darker background for tooltip for better contrast
+                    backgroundColor: 'var(--bg-light)',
+                    titleColor: 'var(--text-primary)',
+                    bodyColor: 'var(--text-primary)',
+                    borderColor: 'var(--border-color)',
+                    borderWidth: 1,
+                    cornerRadius: 6,
+                    padding: 12,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return ' ' + context.dataset.label + ': ₹' + context.parsed.y.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

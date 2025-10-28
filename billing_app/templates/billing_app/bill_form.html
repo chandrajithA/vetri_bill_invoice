@@ -1,0 +1,375 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ title }}</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="bill-form">
+                        {% csrf_token %}
+
+                        {# Bill Details Form #}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.client.id_for_label }}">Client</label>
+                                    {{ form.client }}
+                                    {% if form.client.errors %}<ul class="errorlist">{% for error in form.client.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.bill_date.id_for_label }}">Bill Date</label>
+                                    {{ form.bill_date }}
+                                    {% if form.bill_date.errors %}<ul class="errorlist">{% for error in form.bill_date.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                                    {{ form.due_date }}
+                                    {% if form.due_date.errors %}<ul class="errorlist">{% for error in form.due_date.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <input type="checkbox" id="{{ form.is_paid.id_for_label }}" name="{{ form.is_paid.html_name }}" {% if form.is_paid.value %}checked{% endif %}>
+                                    <label for="{{ form.is_paid.id_for_label }}" style="display: inline-block;">{{ form.is_paid.label }}</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        {# Bill Items Formset - Now using a TABLE structure #}
+                        <div class="bill-items-section mt-4">
+                            <h3>Items</h3>
+                            
+                            {# Display non-field errors for the formset #}
+                            {% if formset.non_form_errors %}
+                                <div class="alert alert-danger" role="alert">
+                                    {{ formset.non_form_errors }}
+                                </div>
+                            {% endif %}
+
+                            <div class="table-responsive">
+                                <table class="table bill-items-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-product-service">Product/Service</th>
+                                            <th class="col-qty text-center">Qty</th>
+                                            <th class="col-unit-price text-right">Unit Price (Base)</th>
+                                            <th class="col-tax-percent text-center">Tax %</th>
+                                            <th class="col-tax-amount text-right">Tax Amount</th>
+                                            <th class="col-amount text-right">Amount (Inc. Tax)</th>
+                                            <th class="col-actions">Del</th> {# For the remove button #}
+                                        </tr>
+                                    </thead>
+                                    <tbody id="formset-container">
+                                        {{ formset.management_form }}
+                                        {% for item_form in formset %}
+                                            <tr class="bill-item-form dynamic-form {% if item_form.instance.pk %}existing-item{% endif %}">
+                                                {# Render hidden fields #}
+                                                {{ item_form.id }}
+                                                {{ item_form.bill }}
+                                                {{ item_form.product_service }}
+                                                {{ item_form.DELETE }}
+
+
+                                                <td class="col-product-service" data-label="Product/Service">
+                                                    <div class="form-group mb-0">
+                                                        <input type="text" name="items-{{ forloop.counter0 }}-product_service_name" value="{{ item_form.product_service_name.value|default:"" }}" class="form-control product-autocomplete" placeholder="Start typing product name" id="id_items-{{ forloop.counter0 }}-product_service_name">
+                                                        {% if item_form.product_service_name.errors %}<ul class="errorlist">{% for error in item_form.product_service_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="col-qty text-center" data-label="Qty">
+                                                    <div class="form-group mb-0">
+                                                        <input type="number" name="items-{{ forloop.counter0 }}-quantity" value="{{ item_form.quantity.value|default:"1" }}" min="1" class="form-control item-quantity" id="id_items-{{ forloop.counter0 }}-quantity">
+                                                        {% if item_form.quantity.errors %}<ul class="errorlist">{% for error in item_form.quantity.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="col-unit-price text-right" data-label="Unit Price (Base)">
+                                                    <div class="form-group mb-0">
+                                                        <p class="form-control-static item-base-unit-price">0.00</p>
+                                                    </div>
+                                                </td>
+                                                <td class="col-tax-percent text-center" data-label="Tax %">
+                                                    <div class="form-group mb-0">
+                                                        <p class="form-control-static item-tax-percentage">0.00%</p>
+                                                    </div>
+                                                </td>
+                                                <td class="col-tax-amount text-right" data-label="Tax Amount">
+                                                    <div class="form-group mb-0">
+                                                        <p class="form-control-static item-tax-amount">0.00</p>
+                                                    </div>
+                                                </td>
+                                                <td class="col-amount text-right" data-label="Amount (Inc. Tax)">
+                                                    <div class="form-group mb-0">
+                                                        <p class="form-control-static item-amount-inc-tax">0.00</p>
+                                                    </div>
+                                                </td>
+                                                <td class="col-actions text-center">
+                                                    <button type="button" class="remove-item-button btn btn-danger btn-sm" onclick="{% if item_form.instance.pk %}deleteForm(this){% else %}removeNewForm(this){% endif %}">&#x2715;</button>
+                                                </td>
+                                             
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-flex justify-content-end mt-3 mb-4">
+                                <button type="button" id="add-item-button" class="button button-secondary">Add Item</button>
+                            </div>
+                        </div>
+
+                        <div class="bill-summary">
+                            <div class="bill-summary-card" style="text-align: right;">
+                                <p><span>Subtotal (Base):</span> <span>₹<span id="summary-subtotal-base">0.00</span></span></p>
+                                <p><span>Tax:</span> <span>₹<span id="summary-total-tax">0.00</span></span></p>
+                                <p><span><strong>TOTAL BILL AMOUNT:</strong></span> <span><strong>₹<span id="summary-total-bill-amount">0.00</span></strong></span></p>
+                            </div>
+                        </div>
+
+                        <div class="form-actions mt-3">
+                            <button type="submit" class="button button-primary">Save Bill</button>
+                            <a href="{% url 'bill_list' %}" class="button button-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const productsData = JSON.parse('{{ products_json|escapejs }}');
+    const productsMap = new Map(productsData.map(p => [p.id, p]));
+
+    function parseDecimal(value) {
+        return parseFloat(value) || 0;
+    }
+
+    function updateItemCalculations(formElement) {
+        formElement = $(formElement);
+
+        const productIdInput = formElement.find('input[type="hidden"][name$="-product_service"]');
+        const quantityInput = formElement.find('.item-quantity');
+        const baseUnitPriceDisplay = formElement.find('.item-base-unit-price');
+        const taxPercentageDisplay = formElement.find('.item-tax-percentage');
+        const taxAmountDisplay = formElement.find('.item-tax-amount');
+        const amountIncTaxDisplay = formElement.find('.item-amount-inc-tax');
+
+        const productId = parseInt(productIdInput.val());
+        let quantity = parseDecimal(quantityInput.val());
+
+        if (isNaN(quantity) || quantity < 1) {
+            quantity = 1;
+            quantityInput.val(1);
+        }
+
+        let baseUnitPrice = 0;
+        let taxPercentage = 0;
+        let itemTaxAmount = 0;
+        let amountIncTax = 0;
+
+        if (productsMap.has(productId)) {
+            const product = productsMap.get(productId);
+            baseUnitPrice = parseDecimal(product.price);
+            taxPercentage = parseDecimal(product.tax_percentage);
+
+            const baseItemTotal = baseUnitPrice * quantity;
+            itemTaxAmount = (baseItemTotal * (taxPercentage / 100));
+            amountIncTax = baseItemTotal + itemTaxAmount;
+        }
+
+        baseUnitPriceDisplay.text(baseUnitPrice.toFixed(2));
+        taxPercentageDisplay.text(taxPercentage.toFixed(2) + '%');
+        taxAmountDisplay.text(itemTaxAmount.toFixed(2));
+        amountIncTaxDisplay.text(amountIncTax.toFixed(2));
+
+        // Call to update the overall bill summary
+        updateBillSummary();
+    }
+
+    // RENAMED from updateTotalBillAmount to updateBillSummary for clarity
+    function updateBillSummary() {
+        let totalSubtotalBase = 0;
+        let totalTaxOnItems = 0;
+        let totalBillAmountIncTax = 0;
+
+        $('.bill-item-form:not(.deleted-form)').each(function() {
+            const formElement = $(this);
+            const productId = parseInt(formElement.find('input[type="hidden"][name$="-product_service"]').val());
+            const quantity = parseDecimal(formElement.find('.item-quantity').val());
+
+            if (productsMap.has(productId)) {
+                const product = productsMap.get(productId);
+                const baseUnitPrice = parseDecimal(product.price);
+                const taxPercentage = parseDecimal(product.tax_percentage);
+
+                const baseItemTotal = baseUnitPrice * quantity;
+                const itemTaxAmount = (baseItemTotal * (taxPercentage / 100));
+                const itemAmountIncTax = baseItemTotal + itemTaxAmount;
+
+                totalSubtotalBase += baseItemTotal;
+                totalTaxOnItems += itemTaxAmount;
+                totalBillAmountIncTax += itemAmountIncTax;
+            }
+        });
+
+        // Update the display for each summary field
+        $('#summary-subtotal-base').text(totalSubtotalBase.toFixed(2));
+        $('#summary-total-tax').text(totalTaxOnItems.toFixed(2));
+        $('#summary-total-bill-amount').text(totalBillAmountIncTax.toFixed(2));
+    }
+
+    function initAutocomplete(inputElement) {
+        $(inputElement).autocomplete({
+            source: function(request, response) {
+                const term = request.term.toLowerCase();
+                const filteredProducts = productsData.filter(product =>
+                    product.name.toLowerCase().includes(term)
+                );
+                response(filteredProducts.map(product => ({
+                    label: product.name,
+                    value: product.name,
+                    id: product.id,
+                    price: product.price,
+                    tax_percentage: product.tax_percentage
+                })));
+            },
+            minLength: 2,
+            select: function(event, ui) {
+                const formElement = $(this).closest('.bill-item-form');
+                formElement.find('input[type="hidden"][name$="-product_service"]').val(ui.item.id);
+                $(this).val(ui.item.value);
+                updateItemCalculations(formElement);
+                return false;
+            },
+            change: function(event, ui) {
+                const formElement = $(this).closest('.bill-item-form');
+                const hiddenProductIdInput = formElement.find('input[type="hidden"][name$="-product_service"]');
+                const autocompleteTextInput = $(this);
+
+                if (!ui.item) {
+                    const currentText = autocompleteTextInput.val();
+                    const matchedProduct = productsData.find(p => p.name === currentText);
+                    if (matchedProduct) {
+                        hiddenProductIdInput.val(matchedProduct.id);
+                        autocompleteTextInput.val(matchedProduct.name);
+                    } else {
+                        // If no match, clear product ID and name to ensure calculations are zeroed
+                        hiddenProductIdInput.val('');
+                        autocompleteTextInput.val('');
+                    }
+                } else {
+                    hiddenProductIdInput.val(ui.item.id);
+                    // Ensure the autocomplete input always has the correct product name
+                    autocompleteTextInput.val(ui.item.name || ui.item.value);
+                }
+                updateItemCalculations(formElement);
+            }
+        });
+    }
+
+    $(function() {
+        $('#formset-container').on('input', '.item-quantity', function() {
+            updateItemCalculations($(this).closest('.bill-item-form'));
+        });
+        // Also trigger calculation when product selection changes (via autocomplete 'change' event)
+        $('#formset-container').on('autocompletechange', '.product-autocomplete', function() {
+            updateItemCalculations($(this).closest('.bill-item-form'));
+        });
+
+
+        $('.bill-item-form').each(function() {
+            const formElement = $(this);
+            const initialProductId = formElement.find('input[type="hidden"][name$="-product_service"]').val();
+            const autocompleteInput = formElement.find('.product-autocomplete');
+
+            if (initialProductId && productsMap.has(parseInt(initialProductId))) {
+                autocompleteInput.val(productsMap.get(parseInt(initialProductId)).name);
+            }
+            initAutocomplete(autocompleteInput);
+            updateItemCalculations(formElement); // Initial calculation for existing items
+        });
+        updateBillSummary(); // Initial calculation for the entire summary on page load
+    });
+
+    $('#add-item-button').click(function() {
+        const totalFormsInput = $('#id_items-TOTAL_FORMS');
+        const currentFormCount = parseInt(totalFormsInput.val());
+
+        const newFormHtml = `
+            <tr class="bill-item-form dynamic-form">
+                <input type="hidden" name="items-${currentFormCount}-id" id="id_items-${currentFormCount}-id">
+                <input type="hidden" name="items-${currentFormCount}-bill" id="id_items-${currentFormCount}-bill" value="{% if bill %}{{ bill.pk }}{% endif %}">
+                <input type="hidden" name="items-${currentFormCount}-product_service" id="id_items-${currentFormCount}-product_service" class="product-service-id-input">
+                <input type="hidden" name="items-${currentFormCount}-DELETE" id="id_items-${currentFormCount}-DELETE">
+
+                <td class="col-product-service" data-label="Product/Service">
+                    <div class="form-group mb-0">
+                        <input type="text" name="items-${currentFormCount}-product_service_name" class="form-control product-autocomplete" placeholder="Start typing product name" id="id_items-${currentFormCount}-product_service_name">
+                    </div>
+                </td>
+                <td class="col-qty text-center" data-label="Qty">
+                    <div class="form-group mb-0">
+                        <input type="number" name="items-${currentFormCount}-quantity" value="1" min="1" class="form-control item-quantity" id="id_items-${currentFormCount}-quantity">
+                    </div>
+                </td>
+                <td class="col-unit-price text-right" data-label="Unit Price (Base)">
+                    <div class="form-group mb-0">
+                        <p class="form-control-static item-base-unit-price">0.00</p>
+                    </div>
+                </td>
+                <td class="col-tax-percent text-center" data-label="Tax %">
+                    <div class="form-group mb-0">
+                        <p class="form-control-static item-tax-percentage">0.00%</p>
+                    </div>
+                </td>
+                <td class="col-tax-amount text-right" data-label="Tax Amount">
+                    <div class="form-group mb-0">
+                        <p class="form-control-static item-tax-amount">0.00</p>
+                    </div>
+                </td>
+                <td class="col-amount text-right" data-label="Amount (Inc. Tax)">
+                    <div class="form-group mb-0">
+                        <p class="form-control-static item-amount-inc-tax">0.00</p>
+                    </div>
+                </td>
+                <td class="col-actions text-center">
+                    <button type="button" class="remove-item-button btn btn-danger btn-sm" onclick="removeNewForm(this)">&#x2715;</button>
+                </td>
+            </tr>
+        `;
+        const newForm = $(newFormHtml);
+        $('#formset-container').append(newForm);
+
+        initAutocomplete(newForm.find(`#id_items-${currentFormCount}-product_service_name`));
+        updateItemCalculations(newForm); // Recalculate for the new item
+        updateBillSummary(); // Recalculate overall summary
+        totalFormsInput.val(currentFormCount + 1);
+    });
+
+    function removeNewForm(button) {
+        $(button).closest('tr.dynamic-form').remove();
+        const totalFormsInput = $('#id_items-TOTAL_FORMS');
+        totalFormsInput.val(parseInt(totalFormsInput.val()) - 1);
+        updateBillSummary(); // Recalculate overall summary after removing item
+        // Re-index forms if needed, but not strictly necessary for validation if we check for actual product_service
+    }
+
+    function deleteForm(button) {
+        const formRow = $(button).closest('tr.dynamic-form');
+        formRow.find('input[type="hidden"][name$="-DELETE"]').val('on');
+        formRow.addClass('deleted-form').hide();
+        updateBillSummary(); // Recalculate overall summary after deleting item
+    }
+
+</script>
+{% endblock %}

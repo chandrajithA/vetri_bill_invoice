@@ -1,0 +1,46 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}Clients{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Clients</h2>
+                    <a href="{% url 'client_create' %}" class="button button-primary">Add New Client</a>
+                </div>
+                <div class="card-body">
+                    {% if clients %}
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in clients %}
+                                    <tr>
+                                        <td>{{ client.name }}</td>
+                                        <td>{{ client.email|default:"N/A" }}</td>
+                                        <td>{{ client.phone|default:"N/A" }}</td>
+                                        <td class="actions">
+                                            <a href="{% url 'client_update' client.pk %}">Edit</a>
+                                            <a href="{% url 'client_delete' client.pk %}">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No clients found. <a href="{% url 'client_create' %}">Add your first client</a>.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

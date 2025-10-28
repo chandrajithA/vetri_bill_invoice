@@ -1,0 +1,46 @@
+{% extends "billing_app/base.html" %}
+{% load static %}
+
+{% block title %}Products & Services{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Products & Services</h2>
+                    <a href="{% url 'product_create' %}" class="button button-primary">Add New Product/Service</a>
+                </div>
+                <div class="card-body">
+                    {% if products %}
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Price</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                    <tr>
+                                        <td>{{ product.name }}</td>
+                                        <td>{{ product.description|default:"N/A" }}</td>
+                                        <td>₹{{ product.price|floatformat:2 }}</td>
+                                        <td class="actions">
+                                            <a href="{% url 'product_update' product.pk %}">Edit</a>
+                                            <a href="{% url 'product_delete' product.pk %}">Delete</a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p>No products or services found. <a href="{% url 'product_create' %}">Add your first product or service</a>.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

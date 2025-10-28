@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice #{{ bill.id }}</title>
+    <style>
+        @font-face {
+            font-family: 'NotoSans';
+            src: url("file://{{ font_path }}") format('truetype');
+        }
+        /* General Body & Container Styling */
+        body {
+            font-family: 'NotoSans';
+            font-size: 12px;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact; /* Ensure colors are printed as specified */
+        }
+        .invoice-container {
+            width: 90%; /* Slightly smaller width for better margins */
+            max-width: 800px;
+            margin: 20px auto; /* Centered with top/bottom margin */
+            background-color: #fff;
+        }
+
+        /* Header Styling */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Align items to the top */
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0f4c75; /* Stronger separator */
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-family: 'Montserrat', sans-serif;
+            color: #0f4c75; /* Primary accent color */
+            font-size: 28px;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1.5px; /* Slightly spaced out for modern look */
+        }
+        .header div {
+            text-align: right;
+            line-height: 1.6;
+        }
+        .header p {
+            margin: 0;
+            font-size: 11px;
+        }
+        .header p strong {
+            color: #555;
+            min-width: 80px; /* Align values */
+            display: inline-block;
+        }
+
+        /* Address Blocks */
+        .address-block {
+            width: 48%;
+            float: left;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+        .address-block.right {
+            float: right;
+            text-align: right;
+        }
+        .address-block h3 {
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 8px;
+            color: #0f4c75;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid #ccc; /* Subtle separator */
+            padding-bottom: 5px;
+        }
+        .address-block p {
+            margin: 0;
+            font-size: 10px;
+        }
+        .clearfix::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        /* Table Styling */
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        .details-table th, .details-table td {
+            border: 1px solid #eee;
+            padding: 10px 12px; /* Increased padding */
+            text-align: left;
+        }
+        .details-table th {
+            background-color: #0f4c75; /* Dark blue header */
+            color: #ffffff; /* White text */
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+        .details-table tbody tr:nth-child(even) {
+            background-color: #f9f9f9; /* Zebra striping */
+        }
+        .details-table td {
+            font-size: 10px;
+            color: #444;
+        }
+        .details-table tfoot td {
+            font-weight: bold;
+            font-size: 11px;
+            color: #333;
+            padding-top: 15px;
+            padding-bottom: 15px;
+        }
+        /* No longer used for main total, but kept for consistency if needed */
+        .total-row {
+            text-align: right;
+            background-color: #e6f2f8; /* Light blue background for total row */
+            border-top: 2px solid #0f4c75; /* Strong border for emphasis */
+        }
+        .total-row strong {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px; /* Larger total font */
+            color: #0f4c75;
+        }
+
+        /* Bill Summary Styling */
+        .bill-summary {
+            width: 100%;
+            margin-top: 20px;
+            text-align: right;
+        }
+        .bill-summary-card {
+            display: inline-block; /* Allows content to shrink to fit */
+            border: 1px solid #ddd;
+            padding: 15px 20px;
+            background-color: #f9f9f9;
+            min-width: 250px; /* Ensure it's not too small */
+        }
+        .bill-summary-card p {
+            margin: 5px 0;
+            font-size: 11px;
+            
+        }
+        .bill-summary-card p span:first-child {
+            font-weight: 500;
+        }
+        .bill-summary-card p span:last-child {
+            font-weight: 400;
+            text-align: right;
+            min-width: 70px; /* Align currency values */
+        }
+        .bill-summary-card p.total-line {
+            border-top: 1px solid #eee;
+            padding-top: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            
+            font-weight: bold;
+        }
+        .bill-summary-card p.total-line span:last-child {
+            font-size: 16px;
+            font-weight: bold;
+            color: #0f4c75;
+        }
+
+
+        /* Note Section */
+        .note {
+            margin-top: 40px; /* More space from table */
+            font-style: italic;
+            color: #777;
+            font-size: 10px;
+            border-top: 1px dashed #ccc; /* Dashed line for a lighter feel */
+            padding-top: 15px;
+        }
+        .note p {
+            margin: 5px 0;
+        }
+
+        /* Page Numbers (for xhtml2pdf) */
+        @page {
+            size: A4;
+            margin: 1cm; /* Default margin for all pages */
+            @frame footer {
+                -pdf-frame-content: footerContent;
+                bottom: 0.5cm;
+                margin-left: 1cm;
+                margin-right: 1cm;
+                height: 1cm;
+            }
+        }
+        #footerContent {
+            font-size: 9px;
+            text-align: center;
+            color: #888;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="header">
+            <h1>INVOICE</h1>
+            <div>
+                <p><strong>Invoice #:</strong> {{ bill.id }}</p>
+                <p><strong>Date:</strong> {{ bill.bill_date|date:"F d, Y" }}</p>
+                <p><strong>Due Date:</strong> {{ bill.due_date|date:"F d, Y"|default:"N/A" }}</p>
+            </div>
+        </div>
+
+        <div class="clearfix">
+            <div class="address-block">
+                <h3>Bill From:</h3>
+                <p>Your Company Name</p>
+                <p>123 Business Rd</p>
+                <p>City, State, ZIP</p>
+                <p>Email: contact@yourcompany.com</p>
+                <p>Phone: (123) 456-7890</p>
+            </div>
+            <div class="address-block right">
+                <h3>Bill To:</h3>
+                <p>{{ bill.client.name }}</p>
+                <p>{{ bill.client.address|linebreaksbr }}</p>
+                <p>Email: {{ bill.client.email|default:"N/A" }}</p>
+                <p>Phone: {{ bill.client.phone|default:"N/A" }}</p>
+            </div>
+        </div>
+
+        <table class="details-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th style="text-align: right;">Unit Price (Base)</th>
+                    <th style="text-align: center;">Tax %</th>
+                    <th style="text-align: right;">Tax Amount</th>
+                    <th style="text-align: right;">Total (Inc. Tax)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bill.items.all %}
+                <tr>
+                    <td>{{ item.product_service.name }}</td>
+                    <td style="text-align: center;">{{ item.quantity }}</td>
+                    <td style="text-align: right;">{{ item.product_service.price|floatformat:2 }}</td>
+                    <td style="text-align: center;">{{ item.product_service.tax_percentage|floatformat:2 }}%</td>
+                    <td style="text-align: right;">{{ item.tax_amount_per_item|floatformat:2 }}</td>
+                    <td style="text-align: right;">{{ item.item_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="bill-summary">
+            <div class="bill-summary-card">
+                <p><span>Subtotal (Base):</span> <span>Rs.{{ bill.subtotal_before_all_taxes|floatformat:2 }}</span></p>
+                <p><span>Tax:</span> <span>Rs.{{ bill.total_tax_on_items|floatformat:2 }}</span></p>
+                <p class="total-line"><span><strong>TOTAL BILL AMOUNT:</strong></span> <span><strong>Rs.{{ bill.total_amount|floatformat:2 }}</strong></span></p>
+            </div>
+        </div>
+
+        <div class="note">
+            <p>Thank you for your business!</p>
+            {% if not bill.is_paid %}
+            <p>Please make payment by {{ bill.due_date|date:"F d, Y" }}.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Footer for page numbers using xhtml2pdf's @frame -->
+    <div id="footerContent">
+        <p>Page <pdf:pagenumber /> of <pdf:pagecount /></p>
+    </div>
+</body>
+</html>

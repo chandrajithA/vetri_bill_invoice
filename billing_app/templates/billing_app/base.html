@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vetri Billing - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css"> {# For Autocomplete styling #}
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a class="navbar-brand" href="{% url 'dashboard' %}">
+                {# You might add an SVG logo here #}
+                Billify
+            </a>
+            <div class="nav-content">
+                <ul class="nav-links">
+                    <li class="nav-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a href="{% url 'client_list' %}">Clients</a></li>
+                    <li class="nav-item"><a href="{% url 'product_list' %}">Products</a></li>
+                    <li class="nav-item"><a href="{% url 'bill_list' %}">Bills</a></li>
+                    <li class="nav-item"><a href="{% url 'download_bills_csv' %}">Reports (CSV)</a></li>
+                </ul>
+                <div class="auth-links">
+                    {% if user.is_authenticated %}
+                        <span>Welcome, {% if user.first_name %} {{ user.first_name }} {% endif %}</span>
+                        <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-btn">Logout</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
